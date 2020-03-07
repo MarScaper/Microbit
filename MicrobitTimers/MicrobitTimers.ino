@@ -45,6 +45,7 @@
 /*                          TIMER 0 MANAGEMENT                               */
 /*                                                                           */
 /*****************************************************************************/
+
 long outlineCount = 0;
 
 void start_timer0(void)
@@ -371,11 +372,6 @@ void setup()
   pinMode(buttonB, INPUT);
 
   enableScreen();
-
- /* start_timer0();
-  start_timer1();
-  start_timer2();
-  Serial.println("All timers are running");*/
 
   Serial.println("Press A to launch timers and B to stop timers.");
 }
