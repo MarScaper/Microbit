@@ -2,6 +2,8 @@
 
 Sample C code showing usage of hardware timers (Timer0, Timer1 and Timer2) with Arduino IDE and micro:bit board.
 
+## Video
+
 [![Alt text for your video](https://img.youtube.com/vi/ZVl5-23s2xQ/0.jpg)](https://www.youtube.com/watch?v=ZVl5-23s2xQ)
 
 ## License
