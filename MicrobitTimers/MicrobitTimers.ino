@@ -1,4 +1,3 @@
-
 /*****************************************************************************/
 /*
  *
@@ -45,7 +44,8 @@
 /*                          TIMER 0 MANAGEMENT                               */
 /*                                                                           */
 /*****************************************************************************/
-long outlineCount = 0;
+
+long outline = 0;
 
 void start_timer0(void)
 {    
@@ -76,8 +76,8 @@ void timer_pal0(void)
   NRF_TIMER0->EVENTS_COMPARE[0] = 0;         //Clear compare register 0 event 
 
   // Do the job for display...
-  outlineCount++;
-  if( outlineCount>9 ) outlineCount=0;
+  outline++;
+  if( outline>9 ) outline=0;
 }
 
 
@@ -87,7 +87,7 @@ void timer_pal0(void)
 /*                                                                           */
 /*****************************************************************************/
 
-long progressCount = 0;
+long progress = 0;
 
 void start_timer1(void)
 {    
@@ -118,8 +118,8 @@ void timer_pal1(void)
   NRF_TIMER1->EVENTS_COMPARE[0] = 0;         //Clear compare register 0 event 
 
   // Do the job for display...
-  progressCount++;
-  if( progressCount>2 ) progressCount=0;
+  progress++;
+  if( progress>2 ) progress=0;
 }
 
 
@@ -129,8 +129,8 @@ void timer_pal1(void)
 /*                                                                           */
 /*****************************************************************************/
 
-long fadeCount = 0;
-int  incFade   = 1;
+long fade    = 0;
+int  incFade = 1;
 
 void start_timer2(void)
 { 
@@ -161,15 +161,15 @@ void timer_pal2(void)
   NRF_TIMER2->EVENTS_COMPARE[0] = 0;         //Clear compare register 0 event 
 
   // Do the job for display...
-  fadeCount += incFade;
-  if( fadeCount>8 )
+  fade += incFade;
+  if( fade>5 )
   {
     incFade = -1;
   }
-  else if( fadeCount < 0 )
+  else if( fade < 0 )
   {
     incFade = 1;
-    fadeCount = 0;
+    fade = 0;
   }
 }
 
@@ -210,22 +210,35 @@ const uint8_t heart[colCount]
   B00100
 };
 
-const LED_POINT heartOutline[10] PROGMEM =  {{2, 4}, {3, 3}, {4, 2}, {4, 1}, {3, 0}, {2, 1}, {1, 0}, {0, 1}, {0, 2}, {1, 3}};
-const LED_POINT progress[10] PROGMEM =  {{1, 2}, {2, 2}, {3, 2}};
+const LED_POINT heartOutline[10] PROGMEM = {{2, 4}, {3, 3}, {4, 2}, {4, 1}, {3, 0}, {2, 1}, {1, 0}, {0, 1}, {0, 2}, {1, 3}};
+const LED_POINT progressList[3]      PROGMEM = {{1, 2}, {2, 2}, {3, 2}};
 
-bool screenArr[colCount][rowCount];
+unsigned int screenArray[colCount][rowCount];
 
-void pset(const uint8_t x, const uint8_t y, const uint8_t mode) 
+// Around 10x faster
+void fastDigitalWrite( uint32_t ulPin, uint32_t ulVal )
 {
-  if( mode )
-  {
-    LED_POINT position = LED_POS[y][x];
-    
-    digitalWrite(cols[position.x], LOW );
-    digitalWrite(rows[position.y], HIGH);
+  ulPin = g_ADigitalPinMap[ulPin];
+  (ulVal)?NRF_GPIO->OUTSET=(1UL<<ulPin):NRF_GPIO->OUTCLR=(1UL<<ulPin);
+}
 
-    digitalWrite(cols[position.x], HIGH);
-    digitalWrite(rows[position.y], LOW );
+void pixelSet(const uint8_t x, const uint8_t y, uint8_t brightness) 
+{
+  if( brightness )
+  {
+    if( brightness > 100) brightness=100;
+    
+    LED_POINT position = LED_POS[y][x];
+
+    fastDigitalWrite(cols[position.x], LOW );
+    fastDigitalWrite(rows[position.y], HIGH);
+   
+    nrf_delay_us(brightness);
+    
+    fastDigitalWrite(cols[position.x], HIGH);
+    fastDigitalWrite(rows[position.y], LOW );
+
+    nrf_delay_us(25);
   }
 }
 
@@ -239,6 +252,7 @@ void enableScreen()
 
 void showData(const uint8_t *DataArray) 
 {
+  
   for (uint8_t x = 0; x < colCount; x++) 
   {
     uint8_t data = DataArray[x];
@@ -247,15 +261,9 @@ void showData(const uint8_t *DataArray)
     {
       if ((data & 1) ) 
       {
-        LED_POINT position = LED_POS[x][y];
-        
-        digitalWrite(cols[position.x], LOW );
-        digitalWrite(rows[position.y], HIGH);
-        
-        digitalWrite(cols[position.x], HIGH);
-        digitalWrite(rows[position.y], LOW );
+        screenArray[y][x] = 50;
       }
-      
+
       data >>= 1;
     }
   }
@@ -319,36 +327,31 @@ bool BButtonPushed()
 
 void refresh()
 {
-   // Display background (Timer2)
-  for(int i=0; i<fadeCount;i++)
+  // Display background (Timer2)
   for (uint8_t x = 0; x < colCount; x++) 
   {
       for (uint8_t y = 0; y < rowCount; y++) 
       {
-          pset(x, y, 1);
+          screenArray[x][y] = fade;
       }
   }
 
   // Display heart
-  for(int i=0; i<64;i++)
-    showData(heart);
+  showData(heart);
 
   // Display heart outline (Timer0)
-  LED_POINT point = heartOutline[outlineCount];
-  for(int i=0; i<128;i++)
-    pset(point.x, point.y, 1);
+  LED_POINT point = heartOutline[outline];
+  screenArray[point.x][point.y] += 50;
 
   // Display progress line (Timer1)
-  point = progress[progressCount];
-  for(int i=0; i<0xff;i++)
-    pset(point.x, point.y, 1);
-  
+  point = progressList[progress];
+  screenArray[point.x][point.y] += 50;
+
   for (uint8_t x = 0; x < colCount; x++) 
   {
       for (uint8_t y = 0; y < rowCount; y++) 
       {
-        if( screenArr[x][y] )
-          pset(x, y, screenArr[x][y]);
+        pixelSet(x, y, screenArray[x][y]);
       }
   }
 }
@@ -371,11 +374,6 @@ void setup()
   pinMode(buttonB, INPUT);
 
   enableScreen();
-
- /* start_timer0();
-  start_timer1();
-  start_timer2();
-  Serial.println("All timers are running");*/
 
   Serial.println("Press A to launch timers and B to stop timers.");
 }
