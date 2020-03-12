@@ -216,11 +216,7 @@ const LED_POINT progressList[3]      PROGMEM = {{1, 2}, {2, 2}, {3, 2}};
 unsigned int screenArray[colCount][rowCount];
 
 // Around 10x faster
-void fastDigitalWrite( uint32_t ulPin, uint32_t ulVal )
-{
-  ulPin = g_ADigitalPinMap[ulPin];
-  (ulVal)?NRF_GPIO->OUTSET=(1UL<<ulPin):NRF_GPIO->OUTCLR=(1UL<<ulPin);
-}
+#define fastDigitalWrite(ulPin,ulVal)({(ulVal)?NRF_GPIO->OUTSET=(1UL<<g_ADigitalPinMap[ulPin]):NRF_GPIO->OUTCLR=(1UL<<g_ADigitalPinMap[ulPin]);})
 
 void pixelSet(const uint8_t x, const uint8_t y, uint8_t brightness) 
 {
