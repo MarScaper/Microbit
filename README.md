@@ -6,6 +6,12 @@ Sample C code showing usage of hardware timers (Timer0, Timer1 and Timer2) with 
 
 [![Alt text for your video](https://img.youtube.com/vi/ZVl5-23s2xQ/0.jpg)](https://www.youtube.com/watch?v=ZVl5-23s2xQ)
 
+## Prerequisites
+
+Install Micro:bit board within Arduino...
+
+https://learn.adafruit.com/use-micro-bit-with-arduino/install-board-and-blink
+
 ## License
 
 Copyright (c) 2020 by Sebastien MARCHAND 
