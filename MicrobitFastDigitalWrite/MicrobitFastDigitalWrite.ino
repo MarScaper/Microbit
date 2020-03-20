@@ -2,6 +2,7 @@ const int COL1 = 3;     // Column #1 control
 const int LED = 26;     // 'row 1' led
 
 // >10x faster than original nrf functions
+#define fastDigitalWrite(ulPin,ulVal)({(ulVal)?NRF_GPIO->OUTSET=(1UL<<g_ADigitalPinMap[ulPin]):NRF_GPIO->OUTCLR=(1UL<<g_ADigitalPinMap[ulPin]);})
 
 void setup() 
 {  
