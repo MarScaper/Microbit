@@ -1,3 +1,14 @@
+# MicrobitFastDigitalWrite
+
+Sample C code with optimized digitalWrite(). fastDigitalWrite() macro is more than 10x faster than the Nordic Semiconductor nRF5 library.
+
+## Console
+
+Optimized fastDigitalWrite(): 128.40ns -> 7.79MHz
+Standard digitalWrite():  1784.60ns -> 0.56MHz
+Speed improvement: 13.90x
+
+
 # MicrobitTimers
 
 Sample C code showing usage of hardware timers (Timer0, Timer1 and Timer2) with Arduino IDE and micro:bit board.
