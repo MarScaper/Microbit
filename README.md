@@ -1,3 +1,5 @@
+Some goodies for Micro:bit boards with Arduino. :)
+
 # MicrobitFastDigitalWrite
 
 Sample C code with optimized digitalWrite(). fastDigitalWrite() macro is more than 10x faster than the Nordic Semiconductor nRF5 library.
@@ -5,7 +7,9 @@ Sample C code with optimized digitalWrite(). fastDigitalWrite() macro is more th
 ## Console
 
 Optimized fastDigitalWrite(): 128.40ns -> 7.79MHz
+
 Standard digitalWrite():  1784.60ns -> 0.56MHz
+
 Speed improvement: 13.90x
 
 
